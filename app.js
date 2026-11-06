@@ -181,7 +181,9 @@ $('#unlockForm').onsubmit = async (e) => {
 $('#restoreForm').onsubmit = async (e) => {
   e.preventDefault();
   const f = e.target, err = $('.error', f); err.textContent = '';
-  const cfg = { ...defaultSettings().backup, url: f.url.value.trim() };
+  const code = f.code.value.trim().toUpperCase();
+  if (!CODE_RE.test(code)) { err.textContent = 'Code invalide (format XXXX-XXXX-XXXX-XXXX).'; return; }
+  const cfg = { ...defaultSettings().backup, url: BACKUP_BASE + code };
   setBusy(true, 'Téléchargement…');
   try {
     const remote = await sync.pull(cfg);
@@ -486,25 +488,22 @@ addEventListener('paste', (e) => {
 });
 
 // ---------- Réglages ----------
-const CODE_RE = /[A-Z0-9]{4}(-[A-Z0-9]{4}){3,7}(?=[/?#]|$)/i;
-function showCode() {
-  const m = $('#setForm').bUrl.value.match(CODE_RE);
-  $('#bCodeBox').hidden = !m;
-  $('#bCode').textContent = m ? m[0].toUpperCase() : '';
-}
-$('#setForm').bUrl.addEventListener('input', showCode);
-$('#bCopy').onclick = () => copy($('#bCode').textContent);
+const BACKUP_BASE = 'https://sauvegarde.toolsmaker.workers.dev/v1/bookmarks/';
+const CODE_RE = /^[A-Z0-9]{4}(-[A-Z0-9]{4}){3,7}$/;
+const codeFromUrl = (u) => ((u || '').match(/[A-Z0-9]{4}(-[A-Z0-9]{4}){3,7}(?=[/?#]|$)/i) || [''])[0].toUpperCase();
+$('#bCopy').onclick = () => copy($('#setForm').bCode.value);
 $('#settingsBtn').onclick = () => {
   const f = $('#setForm'), s = data.settings, b = s.backup;
   f.autoLock.value = String(s.autoLock); f.lockOnHide.checked = s.lockOnHide; f.blurAll.checked = s.blurAll;
-  f.bUrl.value = b.url; f.bHeader.value = b.header; f.bValue.value = b.value; f.bMeta.value = b.meta; f.bAuto.checked = b.auto;
-  $('#bStatus').textContent = ''; $('#dataStatus').textContent = ''; showCode();
+  f.bCode.value = codeFromUrl(b.url); f.bAuto.checked = b.auto;
+  $('#bStatus').textContent = ''; $('#dataStatus').textContent = '';
   $('#version').textContent = `${VERSION.startsWith('__') ? 'dev' : 'v' + VERSION} · ${data.items.length} favoris`;
   $('#setDlg').showModal();
 };
 function readBackupForm() {
   const f = $('#setForm');
-  return { url: f.bUrl.value.trim(), header: f.bHeader.value.trim(), value: f.bValue.value, meta: f.bMeta.value.trim(), auto: f.bAuto.checked };
+  const code = f.bCode.value.trim().toUpperCase();
+  return { ...data.settings.backup, url: CODE_RE.test(code) ? BACKUP_BASE + code : '', auto: f.bAuto.checked };
 }
 function applySettings() {
   const f = $('#setForm');
@@ -515,22 +514,23 @@ $('#setDlg').addEventListener('close', async () => {
   applySettings(); await persist(); render(); bumpActivity(); toast('Réglages enregistrés');
 });
 $('#bGen').onclick = () => {
-  const base = 'https://sauvegarde.toolsmaker.workers.dev/v1/bookmarks/';
-  const cur = $('#setForm').bUrl.value.trim().replace(/[A-Z0-9]{4}(-[A-Z0-9]{4}){3,7}$/i, '');
-  $('#setForm').bUrl.value = (cur || base) + sync.generateCode();
-  showCode();
+  $('#setForm').bCode.value = sync.generateCode();
   $('#bStatus').textContent = 'Nouveau code généré. Note-le : il te servira à restaurer sur un autre appareil.';
 };
 $('#bTest').onclick = async () => {
-  const st = $('#bStatus'); st.textContent = 'Test…';
+  const st = $('#bStatus'); const cfg = readBackupForm();
+  if (!cfg.url) { st.textContent = 'Entre un code valide ou génères-en un.'; return; }
+  st.textContent = 'Test…';
   try {
-    const r = await sync.pull(readBackupForm());
+    const r = await sync.pull(cfg);
     st.textContent = r ? `✓ Connexion OK. Sauvegarde trouvée (${new Date(r.updatedAt).toLocaleString('fr-FR')}).` : '✓ Connexion OK. Aucune sauvegarde pour l’instant.';
   } catch (ex) { st.textContent = '✗ ' + (ex instanceof TypeError ? 'Injoignable : vérifie l’adresse et que ce site est autorisé (' + location.origin + ')' : ex.message); }
 };
 $('#bPush').onclick = async () => {
   applySettings(); await persist({ syncSoon: false });
-  const st = $('#bStatus'); st.textContent = 'Envoi…';
+  const st = $('#bStatus');
+  if (!data.settings.backup.url) { st.textContent = 'Entre un code valide ou génères-en un.'; return; }
+  st.textContent = 'Envoi…';
   try { await sync.push(data.settings.backup, vault, { force: true }); st.textContent = '✓ Sauvegardé (' + new Date().toLocaleTimeString('fr-FR') + ')'; syncBar(''); }
   catch (ex) { st.textContent = '✗ ' + (ex instanceof TypeError ? 'Injoignable (réseau ou CORS)' : ex.message); }
 };
@@ -614,6 +614,15 @@ $('#pwBtn').onclick = async () => {
     $('#dataStatus').textContent = '✓ Mot de passe changé.';
   } catch (ex) { $('#dataStatus').textContent = '✗ ' + (ex.message === 'BAD_PASSWORD' ? 'Ancien mot de passe incorrect' : ex.message); }
 };
+// Force la mise à jour : supprime service worker et caches, puis recharge depuis le réseau.
+$('#updateBtn').onclick = async () => {
+  const b = $('#updateBtn'); b.disabled = true; b.textContent = 'Mise à jour…';
+  try {
+    if ('serviceWorker' in navigator) for (const r of await navigator.serviceWorker.getRegistrations()) await r.unregister();
+    if (window.caches) for (const k of await caches.keys()) await caches.delete(k);
+  } catch {}
+  location.replace(location.pathname + '?maj=' + Date.now()); // le vault reste intact (localStorage) ; le paramètre est effacé au démarrage
+};
 $('#wipeBtn').onclick = () => {
   if (!confirm('Effacer le coffre de CET appareil ? La sauvegarde cloud n’est pas touchée.')) return;
   localStorage.removeItem(LS_KEY); lock();
@@ -645,6 +654,7 @@ function askPassword(title, msg, change = false) {
 // ---------- Partage entrant (Web Share Target) ----------
 function readShare() {
   const p = new URLSearchParams(location.search);
+  if (p.has('maj')) history.replaceState(null, '', location.pathname);
   if (!p.has('url') && !p.has('text') && !p.has('title')) return;
   const url = extractUrl(p.get('url'), p.get('text'), p.get('title'));
   let title = p.get('title') || '';

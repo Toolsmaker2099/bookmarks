@@ -53,7 +53,7 @@
     <form id="restoreForm" method="post" action="#" hidden>
       <input class="sr-only" type="text" name="username" autocomplete="username" value="coffre" tabindex="-1" aria-hidden="true">
       <p class="muted">Récupère ton coffre depuis ta sauvegarde en ligne.</p>
-      <input name="url" type="url" placeholder="https://sauvegarde.toolsmaker.workers.dev/v1/bookmarks/XXXX-XXXX-XXXX-XXXX" required>
+      <input name="code" placeholder="XXXX-XXXX-XXXX-XXXX" autocomplete="off" autocapitalize="characters" spellcheck="false" required>
       <input name="password" type="password" autocomplete="current-password" placeholder="Mot de passe du coffre" required>
       <button class="primary" type="submit">Restaurer</button>
       <button type="button" class="link back">Retour</button>
@@ -189,21 +189,13 @@
 
     <fieldset>
       <legend>Sauvegarde en ligne sécurisée</legend>
-      <label>URL de sauvegarde (avec ton code)
-        <input name="bUrl" type="url" placeholder="https://sauvegarde.toolsmaker.workers.dev/v1/bookmarks/XXXX-XXXX-XXXX-XXXX">
-      </label>
-      <div class="codebox" id="bCodeBox" hidden>
-        <span class="muted small">Ton code de sauvegarde</span>
-        <div class="row-btn"><output id="bCode"></output><button type="button" id="bCopy">Copier</button></div>
-      </div>
-      <button type="button" id="bGen">Générer un code</button>
-      <details><summary class="hint">Options avancées</summary>
-        <div class="row2">
-          <label>En-tête d'auth (optionnel) <input name="bHeader" placeholder="Authorization"></label>
-          <label>Valeur <input name="bValue" type="password" autocomplete="off"></label>
+      <label>Code de sauvegarde
+        <div class="row-btn">
+          <input name="bCode" class="mono" placeholder="XXXX-XXXX-XXXX-XXXX" autocomplete="off" autocapitalize="characters" spellcheck="false">
+          <button type="button" id="bCopy">Copier</button>
         </div>
-        <label>URL d'aperçu des pages (optionnel) <input name="bMeta" placeholder="https://…/meta?url={url}"></label>
-      </details>
+      </label>
+      <button type="button" id="bGen">Générer un code</button>
       <label class="check"><input type="checkbox" name="bAuto"> Sauvegarder automatiquement à chaque modification</label>
       <p class="hint">Tout est chiffré sur ton appareil avant l'envoi : personne d'autre que toi ne peut lire tes favoris.</p>
       <div class="actions wrap">
@@ -229,8 +221,9 @@
       <p id="dataStatus" class="hint" role="status"></p>
     </fieldset>
 
-    <div class="actions">
+    <div class="actions wrap">
       <span class="muted small" id="version"></span>
+      <button type="button" id="updateBtn">Forcer la mise à jour</button>
       <span class="spacer"></span>
       <button value="cancel" formnovalidate>Annuler</button>
       <button class="primary" value="ok">Enregistrer</button>
