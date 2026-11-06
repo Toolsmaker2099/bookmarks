@@ -174,16 +174,18 @@
     <div class="dlg-body">
       <section>
         <h3>Confidentialité</h3>
-        <label class="line">Verrouiller après
+        <label class="line">Rester connecté
           <select name="autoLock">
             <option value="1">1 min</option>
             <option value="5">5 min</option>
             <option value="15">15 min</option>
-            <option value="60">1 h</option>
-            <option value="0">Jamais</option>
+            <option value="60">1 heure</option>
+            <option value="480">8 heures</option>
+            <option value="0">Toujours (déconseillé)</option>
           </select>
         </label>
-        <label class="check"><input type="checkbox" name="lockOnHide"> Verrouiller en quittant l'app</label>
+        <p class="hint">Durée pendant laquelle tu n'as pas à retaper le mot de passe, même si tu quittes l'app. Elle repart de zéro à chaque utilisation.</p>
+        <label class="check"><input type="checkbox" name="lockOnHide"> Verrouiller dès que je quitte l'app</label>
         <label class="check"><input type="checkbox" name="blurAll"> Flouter toutes les miniatures</label>
       </section>
 

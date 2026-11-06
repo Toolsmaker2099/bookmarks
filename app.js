@@ -17,7 +17,7 @@ let showSensitive = false;
 let lockTimer = null, hiddenAt = 0, syncTimer = null, syncing = false;
 
 const defaultSettings = () => ({
-  autoLock: 5, lockOnHide: false, blurAll: false,
+  autoLock: 15, lockOnHide: false, blurAll: false,
   backup: { url: '', header: '', value: '', meta: '', auto: true },
   updatedAt: 0,
 });
@@ -31,6 +31,36 @@ async function persist({ syncSoon = true } = {}) {
   vault = await sealVault(vault, dek, data);
   saveLocalBlob(vault);
   if (syncSoon && data.settings.backup.auto && sync.isConfigured(data.settings.backup)) scheduleSync();
+}
+
+// ---------- Session mémorisée ----------
+// La clé de chiffrement (CryptoKey NON extractable) est gardée dans IndexedDB pendant la durée choisie :
+// on reste connecté après un aller-retour vers une autre app, un rechargement ou une mise à jour. Le mot de passe, lui, n'est jamais stocké.
+const idb = {
+  open: () => new Promise((res, rej) => { const r = indexedDB.open('safe-bookmarks', 1); r.onupgradeneeded = () => r.result.createObjectStore('s'); r.onsuccess = () => res(r.result); r.onerror = () => rej(r.error); }),
+  async run(mode, fn) { const db = await idb.open(); return new Promise((res, rej) => { const t = db.transaction('s', mode); const q = fn(t.objectStore('s')); t.oncomplete = () => { db.close(); res(q && q.result); }; t.onerror = t.onabort = () => { db.close(); rej(t.error); }; }); },
+};
+let lastSessionSave = 0;
+async function saveSession(force = false) {
+  if (!dek || !data) return;
+  const now = Date.now();
+  if (!force && now - lastSessionSave < 10000) return;
+  lastSessionSave = now;
+  const minutes = +data.settings.autoLock;
+  try { await idb.run('readwrite', s => s.put({ dek, lastActive: now, minutes, vaultKey: vault?.wk?.ct || '' }, 'session')); } catch {}
+}
+const clearSession = () => idb.run('readwrite', s => s.delete('session')).catch(() => {});
+async function resumeSession() {
+  try {
+    if (!loadLocal()) return false;
+    const s = await idb.run('readonly', st => st.get('session'));
+    if (!s || !s.dek) return false;
+    if (s.minutes > 0 && Date.now() - s.lastActive > s.minutes * 60000) { await clearSession(); return false; }
+    vault = loadLocal();
+    data = normalize(await decryptJson(s.dek, vault.data));
+    dek = s.dek;
+    return true;
+  } catch { await clearSession(); dek = null; data = null; return false; }
 }
 
 // ---------- Utilitaires UI ----------
@@ -76,6 +106,7 @@ function showLock() {
 }
 
 function lock() {
+  clearSession();
   hideAllPw();
   dek = null; data = null;
   $('#grid').replaceChildren(); $('#tagChips').replaceChildren();
@@ -87,6 +118,7 @@ function lock() {
 
 function bumpActivity() {
   if (!data) return;
+  saveSession();
   clearTimeout(lockTimer);
   const min = +data.settings.autoLock;
   if (min > 0) lockTimer = setTimeout(lock, min * 60000);
@@ -98,7 +130,7 @@ document.addEventListener('visibilitychange', () => {
   if (!data) return;
   if (document.hidden) {
     hiddenAt = Date.now();
-    if (data.settings.lockOnHide) lock();
+    if (data.settings.lockOnHide) lock(); else saveSession(true);
   } else {
     const min = +data.settings.autoLock;
     if (min > 0 && Date.now() - hiddenAt > min * 60000) lock();
@@ -114,6 +146,7 @@ addEventListener('keydown', (e) => {
 
 async function enterApp() {
   $('#lock').hidden = true; $('#app').hidden = false;
+  saveSession(true);
   $('#unlockPw').value = '';
   bumpActivity(); render();
   if (pendingShare) { const s = pendingShare; pendingShare = null; openEditor(null, s); }
@@ -700,6 +733,11 @@ function hideAllPw() {
 readShare();
 showLock();
 if (pendingShare && loadLocal()) $('#unlockForm .muted').textContent = 'Déverrouille pour ajouter le lien partagé';
+resumeSession().then(async (ok) => {
+  if (!ok) return;
+  await enterApp();
+  if (sync.isConfigured(data.settings.backup) && data.settings.backup.auto) syncNow({ quiet: true });
+});
 // Mises à jour automatiques : vérification à chaque ouverture / retour au premier plan, rechargement dès qu'une nouvelle version prend la main.
 if ('serviceWorker' in navigator) {
   const hadController = !!navigator.serviceWorker.controller;
