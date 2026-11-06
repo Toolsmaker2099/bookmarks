@@ -10,5 +10,7 @@ self.addEventListener('activate', (e) => {
 self.addEventListener('fetch', (e) => {
   const r = e.request;
   if (r.method !== 'GET' || new URL(r.url).origin !== location.origin) return; // le reste passe tel quel
-  e.respondWith(fetch(new Request(r.url, { cache: 'no-store', credentials: 'same-origin', redirect: 'follow', headers: r.headers })));
+  // Paramètre unique : contourne aussi le cache du CDN de GitHub Pages (en plus du cache du navigateur).
+  const u = new URL(r.url); u.searchParams.set('_', Date.now());
+  e.respondWith(fetch(new Request(u.href, { cache: 'no-store', credentials: 'same-origin', redirect: 'follow' })));
 });
