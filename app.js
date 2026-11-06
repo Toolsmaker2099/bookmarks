@@ -490,7 +490,23 @@ addEventListener('paste', (e) => {
 // ---------- Réglages ----------
 const BACKUP_BASE = 'https://sauvegarde.toolsmaker.workers.dev/v1/bookmarks/';
 const CODE_RE = /^[A-Z0-9]{4}(-[A-Z0-9]{4}){3,7}$/;
+// Saisie du code : majuscules et tirets ajoutés automatiquement (XXXX-XXXX-XXXX-XXXX).
+function formatCode(raw) { return (raw.toUpperCase().replace(/[^A-Z0-9]/g, '').slice(0, 32).match(/.{1,4}/g) || []).join('-'); }
+function autoDash(input) {
+  input.maxLength = 39; input.inputMode = 'text';
+  input.addEventListener('input', () => {
+    const pos = input.selectionStart;
+    const alnumBefore = input.value.slice(0, pos).replace(/[^A-Za-z0-9]/g, '').length;
+    input.value = formatCode(input.value);
+    let n = 0, i = 0;
+    for (; i < input.value.length && n < alnumBefore; i++) if (input.value[i] !== '-') n++;
+    if (input.value[i] === '-' && alnumBefore % 4 === 0 && alnumBefore > 0 && i < input.value.length) i++;
+    try { input.setSelectionRange(i, i); } catch {}
+  });
+}
 const codeFromUrl = (u) => ((u || '').match(/[A-Z0-9]{4}(-[A-Z0-9]{4}){3,7}(?=[/?#]|$)/i) || [''])[0].toUpperCase();
+autoDash($('#setForm').bCode);
+autoDash($('#restoreForm').code);
 $('#bCopy').onclick = () => copy($('#setForm').bCode.value);
 $('#settingsBtn').onclick = () => {
   const f = $('#setForm'), s = data.settings, b = s.backup;
