@@ -1,6 +1,6 @@
 // Service worker : met l'app en cache pour qu'elle marche hors ligne.
 // Ne met JAMAIS en cache les requêtes vers d'autres domaines (miniatures, worker…).
-const CACHE = 'safe-bookmarks-v1.0.4';
+const CACHE = 'safe-bookmarks-v1.0.5';
 const SHELL = ['./', 'index.html', 'styles.css', 'app.js', 'crypto.js', 'media.js', 'sync.js', 'manifest.webmanifest',
   'icons/icon-192.png', 'icons/icon-512.png', 'icons/maskable-512.png'];
 
