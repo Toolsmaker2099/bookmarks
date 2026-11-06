@@ -146,3 +146,29 @@ dialog.settings form { display: flex; flex-direction: column; gap: 0; min-height
 .btns.two { display: grid; grid-template-columns: 1fr 1fr; }
 .btns.two button { width: 100%; }
 .dlg-body .row-btn input { padding: 8px 12px; }
+
+/* ===== Finition « pro » des réglages ===== */
+dialog.settings { border-radius: 14px; border: 1px solid var(--line); box-shadow: 0 24px 64px rgb(0 0 0 / .35); }
+dialog.settings button { height: 34px; padding: 0 14px; font-size: 13.5px; font-weight: 500; line-height: 1; border-radius: 8px; background: var(--surface); border: 1px solid var(--line); }
+dialog.settings button:hover { background: var(--surface-2); filter: none; }
+dialog.settings button.primary { background: var(--accent); color: var(--accent-text); border-color: transparent; font-weight: 600; }
+dialog.settings button.primary:hover { filter: brightness(1.08); background: var(--accent); }
+dialog.settings button.danger { color: var(--danger); }
+dialog.settings input, dialog.settings select { height: 34px; padding: 0 10px; font-size: 14px; border-radius: 8px; }
+dialog.settings .row-btn input { padding: 0 10px; }
+dialog.settings .row-btn button { flex: none; }
+.dlg-body { scrollbar-width: thin; scrollbar-color: var(--line) transparent; scrollbar-gutter: stable; padding-right: 14px; }
+.dlg-body::-webkit-scrollbar { width: 8px; }
+.dlg-body::-webkit-scrollbar-thumb { background: var(--line); border-radius: 8px; }
+.dlg-body::-webkit-scrollbar-track { background: transparent; }
+.btns.grid2 { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; }
+.btns.grid2 button, .btns.two button { width: 100%; }
+.dlg-head { border-bottom: 1px solid var(--line); padding: 14px 20px; }
+.dlg-body section:first-child { border-top: none; }
+.dlg-foot button { min-width: 96px; }
+dialog.settings input[type=checkbox] { height: 16px; width: 16px; padding: 0; margin: 0; accent-color: var(--accent); }
+dialog.settings label.check { min-height: 24px; }
+.dlg-body section { gap: 8px; }
+.btns button { padding: 0 8px; white-space: nowrap; }
+dialog { scrollbar-width: thin; scrollbar-color: var(--line) transparent; }
+dialog:not(.settings) button { height: 36px; padding: 0 14px; font-size: 14px; line-height: 1; border-radius: 8px; }
