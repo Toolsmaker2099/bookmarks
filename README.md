@@ -10,6 +10,12 @@ PWA statique de favoris privés : pages, vidéos (aperçu + lecteur intégré), 
 ## Déploiement
 Settings → Pages → Source : *GitHub Actions*. Le site est servi sur `https://<user>.github.io/bookmarks/`.
 
-## Worker
-`worker/worker.js` + liaison KV `BACKUP`, secrets `TOKEN` et `ALLOWED_ORIGIN=https://toolsmaker2099.github.io`.
-Dans l'app : URL `…/backup`, en-tête `Authorization`, valeur `Bearer <TOKEN>`, URL d'aperçu `…/meta?url={url}`.
+## Sauvegarde (worker « sauvegarde » toolsmaker)
+Dans le worker, ajouter une ligne dans `APPS` :
+
+    bookmarks: { origins: ['https://toolsmaker2099.github.io'], maxKo: 1024, keepDays: 730 },
+
+Dans l'app : Réglages → URL `https://sauvegarde.toolsmaker.workers.dev/v1/bookmarks/XXXX-XXXX-XXXX-XXXX`
+(bouton « Générer un code »). Le code est le seul secret d'accès, et le contenu est de toute façon chiffré
+avec le mot de passe du coffre. Pas de route d'aperçu de pages dans ce worker : seules les vidéos des
+plateformes connues ont une miniature automatique (l'URL d'aperçu reste optionnelle).

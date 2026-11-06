@@ -18,7 +18,7 @@ let lockTimer = null, hiddenAt = 0, syncTimer = null, syncing = false;
 
 const defaultSettings = () => ({
   autoLock: 5, lockOnHide: false, blurAll: false,
-  backup: { url: '', method: 'PUT', header: 'Authorization', value: '', meta: '', auto: true },
+  backup: { url: '', header: '', value: '', meta: '', auto: true },
   updatedAt: 0,
 });
 const emptyData = () => ({ items: [], tombstones: {}, settings: defaultSettings() });
@@ -173,7 +173,7 @@ $('#unlockForm').onsubmit = async (e) => {
 $('#restoreForm').onsubmit = async (e) => {
   e.preventDefault();
   const f = e.target, err = $('.error', f); err.textContent = '';
-  const cfg = { ...defaultSettings().backup, url: f.url.value.trim(), header: f.header.value.trim(), value: f.value.value };
+  const cfg = { ...defaultSettings().backup, url: f.url.value.trim() };
   setBusy(true, 'Téléchargement…');
   try {
     const remote = await sync.pull(cfg);
@@ -225,7 +225,7 @@ function syncBar(msg, kind = '') {
   const b = $('#syncBar'); b.hidden = !msg; b.textContent = msg || ''; b.className = 'syncbar ' + kind;
 }
 
-async function syncNow({ quiet = false, password = null, forcePush = false } = {}) {
+async function syncNow({ quiet = false, password = null, forcePush = false, retry = 0 } = {}) {
   if (!data || syncing) return;
   const cfg = data.settings.backup;
   if (!sync.isConfigured(cfg)) return;
@@ -249,7 +249,13 @@ async function syncNow({ quiet = false, password = null, forcePush = false } = {
     const changedLocal = digest(merged) !== digest(data);
     data = merged;
     if (changedLocal || !remote) { vault = await sealVault(vault, dek, data); saveLocalBlob(vault); render(); }
-    if (forcePush || !remote || digest(merged) !== digest(remoteData)) await sync.push(cfg, vault);
+    if (forcePush || !remote || digest(merged) !== digest(remoteData)) {
+      try { await sync.push(cfg, vault); }
+      catch (ex) {
+        if (ex.message !== 'CONFLICT' || retry >= 2) throw ex;
+        syncing = false; return syncNow({ quiet, password, retry: retry + 1 }); // modifié ailleurs entre-temps : on refusionne
+      }
+    }
     if (remote && vault.updatedAt < remote.updatedAt) saveLocalBlob(vault);
     syncBar('');
     if (!quiet) toast('Synchronisé ✓');
@@ -475,14 +481,14 @@ addEventListener('paste', (e) => {
 $('#settingsBtn').onclick = () => {
   const f = $('#setForm'), s = data.settings, b = s.backup;
   f.autoLock.value = String(s.autoLock); f.lockOnHide.checked = s.lockOnHide; f.blurAll.checked = s.blurAll;
-  f.bUrl.value = b.url; f.bMethod.value = b.method || 'PUT'; f.bHeader.value = b.header; f.bValue.value = b.value; f.bMeta.value = b.meta; f.bAuto.checked = b.auto;
+  f.bUrl.value = b.url; f.bHeader.value = b.header; f.bValue.value = b.value; f.bMeta.value = b.meta; f.bAuto.checked = b.auto;
   $('#bStatus').textContent = ''; $('#dataStatus').textContent = '';
   $('#version').textContent = `v${VERSION} · ${data.items.length} favoris`;
   $('#setDlg').showModal();
 };
 function readBackupForm() {
   const f = $('#setForm');
-  return { url: f.bUrl.value.trim(), method: f.bMethod.value, header: f.bHeader.value.trim(), value: f.bValue.value, meta: f.bMeta.value.trim(), auto: f.bAuto.checked };
+  return { url: f.bUrl.value.trim(), header: f.bHeader.value.trim(), value: f.bValue.value, meta: f.bMeta.value.trim(), auto: f.bAuto.checked };
 }
 function applySettings() {
   const f = $('#setForm');
@@ -492,6 +498,12 @@ $('#setDlg').addEventListener('close', async () => {
   if ($('#setDlg').returnValue !== 'ok' || !data) return;
   applySettings(); await persist(); render(); bumpActivity(); toast('Réglages enregistrés');
 });
+$('#bGen').onclick = () => {
+  const base = 'https://sauvegarde.toolsmaker.workers.dev/v1/bookmarks/';
+  const cur = $('#setForm').bUrl.value.trim().replace(/[A-Z0-9]{4}(-[A-Z0-9]{4}){3,7}$/i, '');
+  $('#setForm').bUrl.value = (cur || base) + sync.generateCode();
+  $('#bStatus').textContent = 'Nouveau code généré. Note-le : il te servira à restaurer sur un autre appareil.';
+};
 $('#bTest').onclick = async () => {
   const st = $('#bStatus'); st.textContent = 'Test…';
   try {
@@ -502,7 +514,7 @@ $('#bTest').onclick = async () => {
 $('#bPush').onclick = async () => {
   applySettings(); await persist({ syncSoon: false });
   const st = $('#bStatus'); st.textContent = 'Envoi…';
-  try { await sync.push(data.settings.backup, vault); st.textContent = '✓ Sauvegardé (' + new Date().toLocaleTimeString('fr-FR') + ')'; syncBar(''); }
+  try { await sync.push(data.settings.backup, vault, { force: true }); st.textContent = '✓ Sauvegardé (' + new Date().toLocaleTimeString('fr-FR') + ')'; syncBar(''); }
   catch (ex) { st.textContent = '✗ ' + (ex instanceof TypeError ? 'Injoignable (réseau ou CORS)' : ex.message); }
 };
 $('#bPull').onclick = async () => {
@@ -581,7 +593,7 @@ $('#pwBtn').onclick = async () => {
   try {
     vault = await rewrapVault(vault, r.old, r.next);
     saveLocalBlob(vault);
-    if (sync.isConfigured(data.settings.backup)) await sync.push(data.settings.backup, vault);
+    if (sync.isConfigured(data.settings.backup)) await sync.push(data.settings.backup, vault, { force: true });
     $('#dataStatus').textContent = '✓ Mot de passe changé.';
   } catch (ex) { $('#dataStatus').textContent = '✗ ' + (ex.message === 'BAD_PASSWORD' ? 'Ancien mot de passe incorrect' : ex.message); }
 };

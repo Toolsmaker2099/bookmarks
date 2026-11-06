@@ -50,11 +50,7 @@
 
     <form id="restoreForm" hidden>
       <p class="muted">Récupère ton coffre depuis ton worker Cloudflare.</p>
-      <input name="url" type="url" placeholder="URL de sauvegarde (https://…workers.dev/…)" required>
-      <div class="row2">
-        <input name="header" placeholder="En-tête" value="Authorization">
-        <input name="value" type="password" placeholder="Valeur (ex. Bearer xxx)">
-      </div>
+      <input name="url" type="url" placeholder="https://sauvegarde.toolsmaker.workers.dev/v1/bookmarks/XXXX-XXXX-XXXX-XXXX" required>
       <input name="pw" type="password" autocomplete="current-password" placeholder="Mot de passe du coffre" required>
       <button class="primary" type="submit">Restaurer</button>
       <button type="button" class="link back">Retour</button>
@@ -190,15 +186,17 @@
 
     <fieldset>
       <legend>Sauvegarde Cloudflare KV</legend>
-      <label>URL de sauvegarde <input name="bUrl" type="url" placeholder="https://mon-worker.workers.dev/backup/favoris"></label>
-      <div class="row2">
-        <label>Méthode d'écriture
-          <select name="bMethod"><option>PUT</option><option>POST</option></select>
-        </label>
-        <label>En-tête d'auth <input name="bHeader" placeholder="Authorization"></label>
-      </div>
-      <label>Valeur de l'en-tête <input name="bValue" type="password" placeholder="Bearer mon-token" autocomplete="off"></label>
-      <label>URL d'aperçu (optionnel) <input name="bMeta" placeholder="https://mon-worker.workers.dev/meta?url={url}"></label>
+      <label>URL de sauvegarde (avec ton code)
+        <input name="bUrl" type="url" placeholder="https://sauvegarde.toolsmaker.workers.dev/v1/bookmarks/XXXX-XXXX-XXXX-XXXX">
+      </label>
+      <button type="button" id="bGen">Générer un code</button>
+      <details><summary class="hint">Options avancées</summary>
+        <div class="row2">
+          <label>En-tête d'auth (optionnel) <input name="bHeader" placeholder="Authorization"></label>
+          <label>Valeur <input name="bValue" type="password" autocomplete="off"></label>
+        </div>
+        <label>URL d'aperçu des pages (optionnel) <input name="bMeta" placeholder="https://…/meta?url={url}"></label>
+      </details>
       <label class="check"><input type="checkbox" name="bAuto"> Sauvegarder automatiquement à chaque modification</label>
       <p class="hint">Le coffre est chiffré avant l'envoi. Le token est stocké dans le coffre chiffré.</p>
       <div class="actions wrap">
