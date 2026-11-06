@@ -144,6 +144,7 @@ $('#createForm').onsubmit = async (e) => {
     data = emptyData();
     ({ vault, dek } = await createVault(pw, data));
     saveLocalBlob(vault);
+    offerToSave(pw);
     f.reset(); $('#pwHint').textContent = '';
     await enterApp();
     toast('Coffre créé. Pense à configurer la sauvegarde dans les réglages.', 4000);
@@ -151,6 +152,13 @@ $('#createForm').onsubmit = async (e) => {
   finally { setBusy(false); }
 };
 
+// Aide les gestionnaires de mots de passe à proposer l'enregistrement (formulaire sans rechargement de page).
+function offerToSave(pw) {
+  try {
+    if (window.PasswordCredential && navigator.credentials?.store)
+      navigator.credentials.store(new PasswordCredential({ id: 'coffre', name: 'Safe Bookmarks', password: pw })).catch(() => {});
+  } catch {}
+}
 let failures = 0;
 $('#unlockForm').onsubmit = async (e) => {
   e.preventDefault();
@@ -179,7 +187,7 @@ $('#restoreForm').onsubmit = async (e) => {
     const remote = await sync.pull(cfg);
     if (!remote) throw new Error('Aucune sauvegarde trouvée à cette adresse.');
     setBusy(true);
-    const r = await unlockVault(remote, f.pw.value);
+    const r = await unlockVault(remote, f.password.value);
     vault = remote; dek = r.dek; data = normalize(r.data);
     if (!sync.isConfigured(data.settings.backup)) data.settings.backup = cfg;
     await persist({ syncSoon: false });

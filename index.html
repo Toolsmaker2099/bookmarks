@@ -24,9 +24,10 @@
     <img src="icons/icon-192.png" alt="" class="lock-logo">
     <h1>Safe Bookmarks</h1>
 
-    <form id="unlockForm" hidden>
+    <form id="unlockForm" method="post" action="#" hidden>
+      <input class="sr-only" type="text" name="username" autocomplete="username" value="coffre" tabindex="-1" aria-hidden="true">
       <p class="muted">Coffre verrouillé</p>
-      <input id="unlockPw" type="password" autocomplete="current-password" placeholder="Mot de passe" required>
+      <input id="unlockPw" name="password" type="password" autocomplete="current-password" placeholder="Mot de passe" required>
       <button class="primary" type="submit">Déverrouiller</button>
       <p id="unlockErr" class="error" role="alert"></p>
       <button type="button" class="link" id="forgotBtn">Mot de passe oublié ?</button>
@@ -38,20 +39,22 @@
       <button id="goRestore">Restaurer depuis ma sauvegarde</button>
     </div>
 
-    <form id="createForm" hidden>
+    <form id="createForm" method="post" action="#" hidden>
+      <input class="sr-only" type="text" name="username" autocomplete="username" value="coffre" tabindex="-1" aria-hidden="true">
       <p class="muted">Choisis un mot de passe. Il chiffre tout, y compris la sauvegarde cloud. <strong>Il ne peut pas être récupéré.</strong></p>
-      <input id="createPw" type="password" autocomplete="new-password" placeholder="Mot de passe" minlength="6" required>
-      <input id="createPw2" type="password" autocomplete="new-password" placeholder="Confirmer" minlength="6" required>
+      <input id="createPw" name="new-password" type="password" autocomplete="new-password" placeholder="Mot de passe" minlength="6" required>
+      <input id="createPw2" name="new-password-confirm" type="password" autocomplete="new-password" placeholder="Confirmer" minlength="6" required>
       <p id="pwHint" class="hint"></p>
       <button class="primary" type="submit">Créer</button>
       <button type="button" class="link back">Retour</button>
       <p class="error" role="alert"></p>
     </form>
 
-    <form id="restoreForm" hidden>
+    <form id="restoreForm" method="post" action="#" hidden>
+      <input class="sr-only" type="text" name="username" autocomplete="username" value="coffre" tabindex="-1" aria-hidden="true">
       <p class="muted">Récupère ton coffre depuis ton worker Cloudflare.</p>
       <input name="url" type="url" placeholder="https://sauvegarde.toolsmaker.workers.dev/v1/bookmarks/XXXX-XXXX-XXXX-XXXX" required>
-      <input name="pw" type="password" autocomplete="current-password" placeholder="Mot de passe du coffre" required>
+      <input name="password" type="password" autocomplete="current-password" placeholder="Mot de passe du coffre" required>
       <button class="primary" type="submit">Restaurer</button>
       <button type="button" class="link back">Retour</button>
       <p class="error" role="alert"></p>
