@@ -526,7 +526,7 @@ $('#bTest').onclick = async () => {
   try {
     const r = await sync.pull(readBackupForm());
     st.textContent = r ? `✓ Connexion OK. Sauvegarde trouvée (${new Date(r.updatedAt).toLocaleString('fr-FR')}).` : '✓ Connexion OK. Aucune sauvegarde pour l’instant.';
-  } catch (ex) { st.textContent = '✗ ' + (ex instanceof TypeError ? 'Injoignable : vérifie l’adresse et que ce site est autorisé (' + location.origin + ') : ex.message); }
+  } catch (ex) { st.textContent = '✗ ' + (ex instanceof TypeError ? 'Injoignable : vérifie l’adresse et que ce site est autorisé (' + location.origin + ')' : ex.message); }
 };
 $('#bPush').onclick = async () => {
   applySettings(); await persist({ syncSoon: false });
@@ -658,4 +658,18 @@ function readShare() {
 readShare();
 showLock();
 if (pendingShare && loadLocal()) $('#unlockForm .muted').textContent = 'Déverrouille pour ajouter le lien partagé';
-if ('serviceWorker' in navigator) navigator.serviceWorker.register('sw.js').catch(() => {});
+// Mises à jour automatiques : vérification à chaque ouverture / retour au premier plan, rechargement dès qu'une nouvelle version prend la main.
+if ('serviceWorker' in navigator) {
+  const hadController = !!navigator.serviceWorker.controller;
+  let reloaded = false;
+  navigator.serviceWorker.addEventListener('controllerchange', () => {
+    if (!hadController || reloaded) return; // première installation : rien à recharger
+    reloaded = true;
+    if (data) toast('Mise à jour installée', 1500); // le coffre se reverrouille au rechargement
+    setTimeout(() => location.reload(), data ? 600 : 0);
+  });
+  navigator.serviceWorker.register('sw.js', { updateViaCache: 'none' }).then((reg) => {
+    reg.update().catch(() => {});
+    document.addEventListener('visibilitychange', () => { if (!document.hidden) reg.update().catch(() => {}); });
+  }).catch(() => {});
+}
