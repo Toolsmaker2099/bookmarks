@@ -25,7 +25,7 @@
     <h1>Safe Bookmarks</h1>
 
     <form id="unlockForm" method="post" action="#" hidden>
-      <input class="sr-only" type="text" name="username" autocomplete="username" value="coffre" tabindex="-1" aria-hidden="true">
+      <input type="text" name="username" autocomplete="username" value="coffre" aria-label="Identifiant du coffre" autocapitalize="none" spellcheck="false">
       <p class="muted">Coffre verrouillé</p>
       <input id="unlockPw" name="password" type="password" autocomplete="current-password" placeholder="Mot de passe" required>
       <button class="primary" type="submit">Déverrouiller</button>
@@ -40,8 +40,8 @@
     </div>
 
     <form id="createForm" method="post" action="#" hidden>
-      <input class="sr-only" type="text" name="username" autocomplete="username" value="coffre" tabindex="-1" aria-hidden="true">
-      <p class="muted">Choisis un mot de passe. Il chiffre tout, y compris la sauvegarde cloud. <strong>Il ne peut pas être récupéré.</strong></p>
+      <input type="text" name="username" autocomplete="username" value="coffre" aria-label="Identifiant du coffre" autocapitalize="none" spellcheck="false">
+      <p class="muted">Choisis un mot de passe. Il chiffre tout, y compris la sauvegarde en ligne. <strong>Il ne peut pas être récupéré.</strong></p>
       <input id="createPw" name="new-password" type="password" autocomplete="new-password" placeholder="Mot de passe" minlength="6" required>
       <input id="createPw2" name="new-password-confirm" type="password" autocomplete="new-password" placeholder="Confirmer" minlength="6" required>
       <p id="pwHint" class="hint"></p>
@@ -52,8 +52,7 @@
 
     <form id="restoreForm" method="post" action="#" hidden>
       <p class="muted">Récupère ton coffre depuis ta sauvegarde en ligne.</p>
-      <input name="code" placeholder="XXXX-XXXX-XXXX-XXXX" autocomplete="off" autocapitalize="characters" spellcheck="false" required>
-      <input class="sr-only" type="text" name="username" autocomplete="username" value="coffre" tabindex="-1" aria-hidden="true">
+      <input name="username" id="restoreCode" type="text" placeholder="Code de sauvegarde (XXXX-XXXX-XXXX-XXXX)" aria-label="Code de sauvegarde" autocomplete="username" autocapitalize="characters" spellcheck="false" required>
       <input id="restorePw" name="password" type="password" autocomplete="current-password" placeholder="Mot de passe du coffre" required>
       <button class="primary" type="submit">Restaurer</button>
       <button type="button" class="link back">Retour</button>

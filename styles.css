@@ -172,3 +172,9 @@ dialog.settings label.check { min-height: 24px; }
 .btns button { padding: 0 8px; white-space: nowrap; }
 dialog { scrollbar-width: thin; scrollbar-color: var(--line) transparent; }
 dialog:not(.settings) button { height: 36px; padding: 0 14px; font-size: 14px; line-height: 1; border-radius: 8px; }
+
+.pw-wrap { position: relative; display: block; }
+.pw-wrap input { padding-right: 44px; }
+.pw-wrap .pw-eye { position: absolute; right: 2px; top: 50%; transform: translateY(-50%); width: 40px; height: 34px; padding: 0; border: none; background: none; display: grid; place-items: center; color: var(--muted); }
+.pw-wrap .pw-eye svg { width: 20px; height: 20px; fill: currentColor; }
+.pw-wrap .pw-eye:hover { color: var(--text); background: none; }

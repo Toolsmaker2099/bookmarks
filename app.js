@@ -76,6 +76,7 @@ function showLock() {
 }
 
 function lock() {
+  hideAllPw();
   dek = null; data = null;
   $('#grid').replaceChildren(); $('#tagChips').replaceChildren();
   $$('dialog[open]').forEach(d => d.close());
@@ -181,7 +182,7 @@ $('#unlockForm').onsubmit = async (e) => {
 $('#restoreForm').onsubmit = async (e) => {
   e.preventDefault();
   const f = e.target, err = $('.error', f); err.textContent = '';
-  const code = f.code.value.trim().toUpperCase();
+  const code = f.username.value.trim().toUpperCase();
   if (!CODE_RE.test(code)) { err.textContent = 'Code invalide (format XXXX-XXXX-XXXX-XXXX).'; return; }
   const cfg = { ...defaultSettings().backup, url: BACKUP_BASE + code };
   setBusy(true, 'Téléchargement…');
@@ -507,7 +508,7 @@ function autoDash(input) {
 }
 const codeFromUrl = (u) => ((u || '').match(/[A-Z0-9]{4}(-[A-Z0-9]{4}){3,7}(?=[/?#]|$)/i) || [''])[0].toUpperCase();
 autoDash($('#setForm').bCode);
-autoDash($('#restoreForm').code);
+autoDash($('#restoreForm').username);
 $('#bCopy').onclick = () => copy($('#setForm').bCode.value);
 $('#settingsBtn').onclick = () => {
   const f = $('#setForm'), s = data.settings, b = s.backup;
@@ -650,7 +651,7 @@ function askPassword(title, msg, change = false) {
   f.reset(); $('.error', f).textContent = '';
   $('#pwTitle').textContent = title; $('#pwMsg').textContent = msg;
   f.a.placeholder = change ? 'Mot de passe actuel' : 'Mot de passe';
-  f.b.hidden = f.c.hidden = !change;
+  f.b.closest('.pw-wrap').hidden = f.c.closest('.pw-wrap').hidden = !change;
   d.showModal(); f.a.focus();
   return new Promise((res) => {
     f.onsubmit = (e) => {
@@ -679,6 +680,29 @@ function readShare() {
   if (url) pendingShare = { url, title };
   // On efface les paramètres de l'URL pour ne rien laisser dans l'historique
   history.replaceState(null, '', location.pathname);
+}
+
+// ---------- Afficher / masquer les mots de passe ----------
+const EYE = 'M12 5C6.5 5 2.7 9.3 1.5 12c1.2 2.7 5 7 10.5 7s9.3-4.3 10.5-7C21.3 9.3 17.5 5 12 5Zm0 11.5a4.5 4.5 0 1 1 0-9 4.5 4.5 0 0 1 0 9Zm0-2.2a2.3 2.3 0 1 0 0-4.6 2.3 2.3 0 0 0 0 4.6Z';
+const EYE_OFF = 'M3.3 2 2 3.3l3.2 3.2C3.4 7.8 2.2 9.8 1.5 12c1.2 2.7 5 7 10.5 7 1.9 0 3.6-.5 5-1.3l3.7 3.7 1.3-1.3L3.3 2Zm8.7 4.5c-1 0-1.9.3-2.7.8l1.7 1.7a2.3 2.3 0 0 1 3 3l2.3 2.3c.9-.9 1.5-2 1.7-3.3a4.5 4.5 0 0 0-6-4.5ZM12 5c-.9 0-1.7.1-2.5.4l2.1 2.1c.1 0 .3-.1.4-.1 2.5 0 4.5 2 4.5 4.5 0 .1 0 .3-.1.4l3 3C20.8 14 22 12.9 22.5 12 21.3 9.3 17.5 5 12 5Z';
+for (const input of $$('input[type=password]')) {
+  const wrap = el('div', { class: 'pw-wrap' });
+  input.replaceWith(wrap); wrap.append(input);
+  const btn = el('button', { type: 'button', class: 'pw-eye', 'aria-label': 'Afficher le mot de passe', title: 'Afficher / masquer', tabindex: '-1' }, svg(EYE));
+  btn.addEventListener('click', () => {
+    const show = input.type === 'password';
+    input.type = show ? 'text' : 'password';
+    $('path', btn).setAttribute('d', show ? EYE_OFF : EYE);
+    btn.setAttribute('aria-label', show ? 'Masquer le mot de passe' : 'Afficher le mot de passe');
+    input.focus();
+  });
+  wrap.append(btn);
+}
+function hideAllPw() {
+  for (const i of $$('.pw-wrap input')) {
+    if (i.type === 'password') continue;
+    i.type = 'password'; $('.pw-eye path', i.parentElement).setAttribute('d', EYE);
+  }
 }
 
 // ---------- Démarrage ----------
