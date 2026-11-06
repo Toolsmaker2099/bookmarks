@@ -51,10 +51,10 @@
     </form>
 
     <form id="restoreForm" method="post" action="#" hidden>
-      <input class="sr-only" type="text" name="username" autocomplete="username" value="coffre" tabindex="-1" aria-hidden="true">
       <p class="muted">Récupère ton coffre depuis ta sauvegarde en ligne.</p>
       <input name="code" placeholder="XXXX-XXXX-XXXX-XXXX" autocomplete="off" autocapitalize="characters" spellcheck="false" required>
-      <input name="password" type="password" autocomplete="current-password" placeholder="Mot de passe du coffre" required>
+      <input class="sr-only" type="text" name="username" autocomplete="username" value="coffre" tabindex="-1" aria-hidden="true">
+      <input id="restorePw" name="password" type="password" autocomplete="current-password" placeholder="Mot de passe du coffre" required>
       <button class="primary" type="submit">Restaurer</button>
       <button type="button" class="link back">Retour</button>
       <p class="error" role="alert"></p>

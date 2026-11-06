@@ -193,6 +193,7 @@ $('#restoreForm').onsubmit = async (e) => {
     vault = remote; dek = r.dek; data = normalize(r.data);
     if (!sync.isConfigured(data.settings.backup)) data.settings.backup = cfg;
     await persist({ syncSoon: false });
+    offerToSave(f.password.value);
     f.reset();
     await enterApp();
     toast(`${data.items.length} favoris restaurés.`);
