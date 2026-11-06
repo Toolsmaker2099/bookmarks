@@ -486,11 +486,19 @@ addEventListener('paste', (e) => {
 });
 
 // ---------- Réglages ----------
+const CODE_RE = /[A-Z0-9]{4}(-[A-Z0-9]{4}){3,7}(?=[/?#]|$)/i;
+function showCode() {
+  const m = $('#setForm').bUrl.value.match(CODE_RE);
+  $('#bCodeBox').hidden = !m;
+  $('#bCode').textContent = m ? m[0].toUpperCase() : '';
+}
+$('#setForm').bUrl.addEventListener('input', showCode);
+$('#bCopy').onclick = () => copy($('#bCode').textContent);
 $('#settingsBtn').onclick = () => {
   const f = $('#setForm'), s = data.settings, b = s.backup;
   f.autoLock.value = String(s.autoLock); f.lockOnHide.checked = s.lockOnHide; f.blurAll.checked = s.blurAll;
   f.bUrl.value = b.url; f.bHeader.value = b.header; f.bValue.value = b.value; f.bMeta.value = b.meta; f.bAuto.checked = b.auto;
-  $('#bStatus').textContent = ''; $('#dataStatus').textContent = '';
+  $('#bStatus').textContent = ''; $('#dataStatus').textContent = ''; showCode();
   $('#version').textContent = `v${VERSION} · ${data.items.length} favoris`;
   $('#setDlg').showModal();
 };
@@ -510,6 +518,7 @@ $('#bGen').onclick = () => {
   const base = 'https://sauvegarde.toolsmaker.workers.dev/v1/bookmarks/';
   const cur = $('#setForm').bUrl.value.trim().replace(/[A-Z0-9]{4}(-[A-Z0-9]{4}){3,7}$/i, '');
   $('#setForm').bUrl.value = (cur || base) + sync.generateCode();
+  showCode();
   $('#bStatus').textContent = 'Nouveau code généré. Note-le : il te servira à restaurer sur un autre appareil.';
 };
 $('#bTest').onclick = async () => {

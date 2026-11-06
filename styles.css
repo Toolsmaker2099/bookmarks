@@ -120,3 +120,6 @@ dialog.view { width: min(1000px, calc(100vw - 16px)); padding: 0; overflow: hidd
 .toast.show { opacity: 1; transform: translate(-50%, 0); }
 
 .sr-only { position: absolute; width: 1px; height: 1px; opacity: 0; overflow: hidden; pointer-events: none; padding: 0; border: 0; }
+
+.codebox { display: grid; gap: 4px; }
+#bCode { flex: 1; font: 600 17px/1.2 ui-monospace, Menlo, Consolas, monospace; letter-spacing: .04em; padding: 10px 12px; border-radius: 10px; background: var(--surface-2); user-select: all; word-break: break-all; }
