@@ -196,7 +196,7 @@ $('#restoreForm').onsubmit = async (e) => {
     toast(`${data.items.length} favoris restaurés.`);
   } catch (ex) {
     err.textContent = ex.message === 'BAD_PASSWORD' ? 'Mot de passe incorrect pour cette sauvegarde.' :
-      (ex instanceof TypeError ? 'Worker injoignable (URL ou CORS ?).' : ex.message);
+      (ex instanceof TypeError ? 'Sauvegarde en ligne injoignable (adresse incorrecte ou accès refusé).' : ex.message);
   } finally { setBusy(false); }
 };
 
@@ -526,7 +526,7 @@ $('#bTest').onclick = async () => {
   try {
     const r = await sync.pull(readBackupForm());
     st.textContent = r ? `✓ Connexion OK. Sauvegarde trouvée (${new Date(r.updatedAt).toLocaleString('fr-FR')}).` : '✓ Connexion OK. Aucune sauvegarde pour l’instant.';
-  } catch (ex) { st.textContent = '✗ ' + (ex instanceof TypeError ? 'Injoignable : vérifie l’URL et que le worker autorise CORS pour ' + location.origin : ex.message); }
+  } catch (ex) { st.textContent = '✗ ' + (ex instanceof TypeError ? 'Injoignable : vérifie l’adresse et que ce site est autorisé (' + location.origin + ') : ex.message); }
 };
 $('#bPush').onclick = async () => {
   applySettings(); await persist({ syncSoon: false });
@@ -602,7 +602,7 @@ $('#refreshThumbs').onclick = async () => {
     done++;
   }
   await persist(); render();
-  st.textContent = `✓ ${todo.length} favoris vérifiés.` + (!readBackupForm().meta ? ' Pour les pages ordinaires, renseigne l’URL d’aperçu du worker.' : '');
+  st.textContent = `✓ ${todo.length} favoris vérifiés.` + (!readBackupForm().meta ? ' Pour les pages ordinaires, renseigne l’adresse d’aperçu dans les options avancées.' : '');
 };
 $('#pwBtn').onclick = async () => {
   const r = await askPassword('Changer le mot de passe', 'Les autres appareils devront utiliser le nouveau mot de passe.', true);

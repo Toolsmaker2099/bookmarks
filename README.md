@@ -3,7 +3,7 @@
 PWA statique de favoris privés : pages, vidéos (aperçu + lecteur intégré), audio.
 
 - **Verrou** par mot de passe, données chiffrées AES-GCM 256 (clé dérivée PBKDF2, 600 000 itérations) dans le navigateur.
-- **Sauvegarde** chiffrée vers un worker Cloudflare KV (`worker/worker.js`), fusion automatique entre appareils.
+- **Sauvegarde en ligne sécurisée**, chiffrée avant envoi, avec fusion automatique entre appareils.
 - **Partage** depuis le navigateur du téléphone (Android, PWA installée) via Web Share Target.
 - Aucun traceur, `no-referrer`, double Échap = verrouillage immédiat.
 

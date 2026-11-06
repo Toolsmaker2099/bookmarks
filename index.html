@@ -52,7 +52,7 @@
 
     <form id="restoreForm" method="post" action="#" hidden>
       <input class="sr-only" type="text" name="username" autocomplete="username" value="coffre" tabindex="-1" aria-hidden="true">
-      <p class="muted">Récupère ton coffre depuis ton worker Cloudflare.</p>
+      <p class="muted">Récupère ton coffre depuis ta sauvegarde en ligne.</p>
       <input name="url" type="url" placeholder="https://sauvegarde.toolsmaker.workers.dev/v1/bookmarks/XXXX-XXXX-XXXX-XXXX" required>
       <input name="password" type="password" autocomplete="current-password" placeholder="Mot de passe du coffre" required>
       <button class="primary" type="submit">Restaurer</button>
@@ -188,7 +188,7 @@
     </fieldset>
 
     <fieldset>
-      <legend>Sauvegarde Cloudflare KV</legend>
+      <legend>Sauvegarde en ligne sécurisée</legend>
       <label>URL de sauvegarde (avec ton code)
         <input name="bUrl" type="url" placeholder="https://sauvegarde.toolsmaker.workers.dev/v1/bookmarks/XXXX-XXXX-XXXX-XXXX">
       </label>
@@ -205,7 +205,7 @@
         <label>URL d'aperçu des pages (optionnel) <input name="bMeta" placeholder="https://…/meta?url={url}"></label>
       </details>
       <label class="check"><input type="checkbox" name="bAuto"> Sauvegarder automatiquement à chaque modification</label>
-      <p class="hint">Le coffre est chiffré avant l'envoi. Le token est stocké dans le coffre chiffré.</p>
+      <p class="hint">Tout est chiffré sur ton appareil avant l'envoi : personne d'autre que toi ne peut lire tes favoris.</p>
       <div class="actions wrap">
         <button type="button" id="bTest">Tester</button>
         <button type="button" id="bPush">Sauvegarder maintenant</button>
