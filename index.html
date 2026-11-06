@@ -1,0 +1,255 @@
+<!doctype html>
+<html lang="fr">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<meta name="referrer" content="no-referrer">
+<meta name="robots" content="noindex, nofollow">
+<meta name="theme-color" content="#14161b">
+<meta name="color-scheme" content="dark light">
+<title>Signets</title>
+<link rel="manifest" href="manifest.webmanifest">
+<link rel="icon" href="icons/icon-192.png">
+<link rel="apple-touch-icon" href="icons/icon-192.png">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-title" content="Signets">
+<link rel="stylesheet" href="styles.css">
+<script type="module" src="app.js"></script>
+</head>
+<body>
+
+<!-- Écran de verrouillage / création -->
+<section id="lock" class="lock">
+  <div class="lock-card">
+    <img src="icons/icon-192.png" alt="" class="lock-logo">
+    <h1>Signets</h1>
+
+    <form id="unlockForm" hidden>
+      <p class="muted">Coffre verrouillé</p>
+      <input id="unlockPw" type="password" autocomplete="current-password" placeholder="Mot de passe" required>
+      <button class="primary" type="submit">Déverrouiller</button>
+      <p id="unlockErr" class="error" role="alert"></p>
+      <button type="button" class="link" id="forgotBtn">Mot de passe oublié ?</button>
+    </form>
+
+    <div id="setupChoice" hidden>
+      <p class="muted">Aucun coffre sur cet appareil.</p>
+      <button class="primary" id="goCreate">Créer un coffre</button>
+      <button id="goRestore">Restaurer depuis ma sauvegarde</button>
+    </div>
+
+    <form id="createForm" hidden>
+      <p class="muted">Choisis un mot de passe. Il chiffre tout, y compris la sauvegarde cloud. <strong>Il ne peut pas être récupéré.</strong></p>
+      <input id="createPw" type="password" autocomplete="new-password" placeholder="Mot de passe" minlength="6" required>
+      <input id="createPw2" type="password" autocomplete="new-password" placeholder="Confirmer" minlength="6" required>
+      <p id="pwHint" class="hint"></p>
+      <button class="primary" type="submit">Créer</button>
+      <button type="button" class="link back">Retour</button>
+      <p class="error" role="alert"></p>
+    </form>
+
+    <form id="restoreForm" hidden>
+      <p class="muted">Récupère ton coffre depuis ton worker Cloudflare.</p>
+      <input name="url" type="url" placeholder="URL de sauvegarde (https://…workers.dev/…)" required>
+      <div class="row2">
+        <input name="header" placeholder="En-tête" value="Authorization">
+        <input name="value" type="password" placeholder="Valeur (ex. Bearer xxx)">
+      </div>
+      <input name="pw" type="password" autocomplete="current-password" placeholder="Mot de passe du coffre" required>
+      <button class="primary" type="submit">Restaurer</button>
+      <button type="button" class="link back">Retour</button>
+      <p class="error" role="alert"></p>
+    </form>
+
+    <p id="busy" class="muted" hidden>Calcul de la clé…</p>
+  </div>
+</section>
+
+<!-- Application -->
+<main id="app" hidden>
+  <header class="top">
+    <div class="search">
+      <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M10.5 4a6.5 6.5 0 1 0 4 11.6l4.2 4.2 1.4-1.4-4.2-4.2A6.5 6.5 0 0 0 10.5 4Zm0 2a4.5 4.5 0 1 1 0 9 4.5 4.5 0 0 1 0-9Z"/></svg>
+      <input id="q" type="search" placeholder="Rechercher" autocomplete="off">
+    </div>
+    <button class="icon" id="sensBtn" title="Afficher / masquer les favoris sensibles" aria-pressed="false">
+      <svg viewBox="0 0 24 24"><path d="M12 5C6.5 5 2.7 9.3 1.5 12c1.2 2.7 5 7 10.5 7s9.3-4.3 10.5-7C21.3 9.3 17.5 5 12 5Zm0 11.5a4.5 4.5 0 1 1 0-9 4.5 4.5 0 0 1 0 9Zm0-2.2a2.3 2.3 0 1 0 0-4.6 2.3 2.3 0 0 0 0 4.6Z"/></svg>
+    </button>
+    <button class="icon" id="settingsBtn" title="Réglages">
+      <svg viewBox="0 0 24 24"><path d="M19.4 13a7.5 7.5 0 0 0 0-2l2.1-1.6-2-3.5-2.5 1a7.4 7.4 0 0 0-1.7-1L14.9 3h-4l-.4 2.7a7.4 7.4 0 0 0-1.7 1l-2.5-1-2 3.5L6.4 11a7.5 7.5 0 0 0 0 2l-2.1 1.6 2 3.5 2.5-1c.5.4 1.1.7 1.7 1l.4 2.7h4l.4-2.7c.6-.3 1.2-.6 1.7-1l2.5 1 2-3.5L19.4 13ZM12.9 15.5a3.5 3.5 0 1 1 0-7 3.5 3.5 0 0 1 0 7Z"/></svg>
+    </button>
+    <button class="icon" id="lockBtn" title="Verrouiller">
+      <svg viewBox="0 0 24 24"><path d="M17 9V7A5 5 0 0 0 7 7v2H5v12h14V9h-2Zm-8-2a3 3 0 0 1 6 0v2H9V7Zm3 10a2 2 0 1 1 0-4 2 2 0 0 1 0 4Z"/></svg>
+    </button>
+  </header>
+
+  <nav class="filters">
+    <div class="chips" id="typeChips">
+      <button class="chip on" data-type="">Tout <span></span></button>
+      <button class="chip" data-type="page">Pages <span></span></button>
+      <button class="chip" data-type="video">Vidéos <span></span></button>
+      <button class="chip" data-type="audio">Audio <span></span></button>
+    </div>
+    <select id="sort" aria-label="Trier">
+      <option value="new">Plus récents</option>
+      <option value="old">Plus anciens</option>
+      <option value="title">Titre A→Z</option>
+      <option value="visits">Plus ouverts</option>
+    </select>
+  </nav>
+  <div class="chips tags" id="tagChips"></div>
+
+  <div id="syncBar" class="syncbar" hidden></div>
+  <section id="grid" class="grid"></section>
+  <p id="empty" class="empty" hidden></p>
+
+  <button id="addBtn" class="fab" title="Ajouter un favori" aria-label="Ajouter un favori">
+    <svg viewBox="0 0 24 24"><path d="M11 5h2v6h6v2h-6v6h-2v-6H5v-2h6z"/></svg>
+  </button>
+</main>
+
+<!-- Ajout / édition -->
+<dialog id="editDlg">
+  <form method="dialog" id="editForm">
+    <h2 id="editTitle">Nouveau favori</h2>
+    <label>Lien
+      <div class="row-btn">
+        <input name="url" type="url" required placeholder="https://…">
+        <button type="button" id="pasteBtn" title="Coller">Coller</button>
+      </div>
+    </label>
+    <div class="preview-mini" id="editPreview"></div>
+    <label>Titre <input name="title" placeholder="Titre"></label>
+    <div class="row2">
+      <label>Type
+        <select name="type">
+          <option value="page">Page web</option>
+          <option value="video">Vidéo</option>
+          <option value="audio">Audio</option>
+        </select>
+      </label>
+      <label>Miniature <input name="thumb" type="url" placeholder="URL de l'image"></label>
+    </div>
+    <label>Tags <input name="tags" placeholder="séparés par des virgules" list="tagList"></label>
+    <datalist id="tagList"></datalist>
+    <label>Note <textarea name="note" rows="2"></textarea></label>
+    <label class="check"><input type="checkbox" name="sensitive"> Sensible (miniature floutée, masquable en un clic)</label>
+    <p class="error" role="alert"></p>
+    <div class="actions">
+      <button type="button" id="fetchBtn">Récupérer l'aperçu</button>
+      <span class="spacer"></span>
+      <button value="cancel" formnovalidate>Annuler</button>
+      <button class="primary" value="ok">Enregistrer</button>
+    </div>
+  </form>
+</dialog>
+
+<!-- Aperçu -->
+<dialog id="viewDlg" class="view">
+  <div class="player" id="player"></div>
+  <div class="view-bar">
+    <div class="view-info"><strong id="viewTitle"></strong><span id="viewDomain" class="muted"></span></div>
+    <button id="viewOpen" class="primary">Ouvrir</button>
+    <button id="viewClose">Fermer</button>
+  </div>
+</dialog>
+
+<!-- Menu d'un favori -->
+<dialog id="menuDlg" class="menu">
+  <form method="dialog">
+    <p id="menuTitle" class="menu-title"></p>
+    <button value="open">Ouvrir</button>
+    <button value="preview" id="menuPreview">Aperçu</button>
+    <button value="copy">Copier le lien</button>
+    <button value="share" id="menuShare">Partager…</button>
+    <button value="edit">Modifier</button>
+    <button value="delete" class="danger">Supprimer</button>
+    <button value="cancel">Annuler</button>
+  </form>
+</dialog>
+
+<!-- Réglages -->
+<dialog id="setDlg" class="settings">
+  <form method="dialog" id="setForm">
+    <h2>Réglages</h2>
+
+    <fieldset>
+      <legend>Confidentialité</legend>
+      <label>Verrouiller après
+        <select name="autoLock">
+          <option value="1">1 min d'inactivité</option>
+          <option value="5">5 min</option>
+          <option value="15">15 min</option>
+          <option value="60">1 h</option>
+          <option value="0">Jamais (déconseillé)</option>
+        </select>
+      </label>
+      <label class="check"><input type="checkbox" name="lockOnHide"> Verrouiller dès que l'app passe en arrière-plan</label>
+      <label class="check"><input type="checkbox" name="blurAll"> Flouter toutes les miniatures</label>
+    </fieldset>
+
+    <fieldset>
+      <legend>Sauvegarde Cloudflare KV</legend>
+      <label>URL de sauvegarde <input name="bUrl" type="url" placeholder="https://mon-worker.workers.dev/backup/favoris"></label>
+      <div class="row2">
+        <label>Méthode d'écriture
+          <select name="bMethod"><option>PUT</option><option>POST</option></select>
+        </label>
+        <label>En-tête d'auth <input name="bHeader" placeholder="Authorization"></label>
+      </div>
+      <label>Valeur de l'en-tête <input name="bValue" type="password" placeholder="Bearer mon-token" autocomplete="off"></label>
+      <label>URL d'aperçu (optionnel) <input name="bMeta" placeholder="https://mon-worker.workers.dev/meta?url={url}"></label>
+      <label class="check"><input type="checkbox" name="bAuto"> Sauvegarder automatiquement à chaque modification</label>
+      <p class="hint">Le coffre est chiffré avant l'envoi. Le token est stocké dans le coffre chiffré.</p>
+      <div class="actions wrap">
+        <button type="button" id="bTest">Tester</button>
+        <button type="button" id="bPush">Sauvegarder maintenant</button>
+        <button type="button" id="bPull">Synchroniser</button>
+      </div>
+      <p id="bStatus" class="hint" role="status"></p>
+    </fieldset>
+
+    <fieldset>
+      <legend>Données</legend>
+      <div class="actions wrap">
+        <button type="button" id="exportBtn">Exporter (fichier chiffré)</button>
+        <button type="button" id="importBtn">Importer…</button>
+        <button type="button" id="importHtmlBtn">Importer favoris navigateur (.html)</button>
+        <button type="button" id="refreshThumbs">Compléter les aperçus manquants</button>
+        <button type="button" id="pwBtn">Changer le mot de passe</button>
+        <button type="button" id="wipeBtn" class="danger">Effacer de cet appareil</button>
+      </div>
+      <input type="file" id="importFile" accept=".json,application/json" hidden>
+      <input type="file" id="importHtml" accept=".html,text/html" hidden>
+      <p id="dataStatus" class="hint" role="status"></p>
+    </fieldset>
+
+    <div class="actions">
+      <span class="muted small" id="version"></span>
+      <span class="spacer"></span>
+      <button value="cancel" formnovalidate>Annuler</button>
+      <button class="primary" value="ok">Enregistrer</button>
+    </div>
+  </form>
+</dialog>
+
+<!-- Demande de mot de passe générique -->
+<dialog id="pwDlg">
+  <form method="dialog" id="pwForm">
+    <h2 id="pwTitle">Mot de passe</h2>
+    <p id="pwMsg" class="muted"></p>
+    <input name="a" type="password" placeholder="Mot de passe" autocomplete="off">
+    <input name="b" type="password" placeholder="Nouveau mot de passe" autocomplete="new-password">
+    <input name="c" type="password" placeholder="Confirmer" autocomplete="new-password">
+    <p class="error" role="alert"></p>
+    <div class="actions">
+      <span class="spacer"></span>
+      <button value="cancel" formnovalidate>Annuler</button>
+      <button class="primary" value="ok">Valider</button>
+    </div>
+  </form>
+</dialog>
+
+<div id="toast" class="toast" role="status" aria-live="polite"></div>
+</body>
+</html>
