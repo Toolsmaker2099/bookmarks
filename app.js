@@ -527,7 +527,7 @@ $('#bPull').onclick = async () => {
 // Export / import
 $('#exportBtn').onclick = () => {
   const blob = new Blob([JSON.stringify(vault)], { type: 'application/json' });
-  const a = el('a', { href: URL.createObjectURL(blob), download: `signets-${new Date().toISOString().slice(0, 10)}.json` });
+  const a = el('a', { href: URL.createObjectURL(blob), download: `safe-bookmarks-${new Date().toISOString().slice(0, 10)}.json` });
   document.body.append(a); a.click(); a.remove(); setTimeout(() => URL.revokeObjectURL(a.href), 1000);
 };
 $('#importBtn').onclick = () => $('#importFile').click();

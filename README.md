@@ -1,4 +1,4 @@
-# Signets
+# Safe Bookmarks
 
 PWA statique de favoris privés : pages, vidéos (aperçu + lecteur intégré), audio.
 

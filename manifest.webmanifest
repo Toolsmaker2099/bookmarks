@@ -1,6 +1,6 @@
 {
-  "name": "Signets",
-  "short_name": "Signets",
+  "name": "Safe Bookmarks",
+  "short_name": "Safe Bookmarks",
   "description": "Favoris privés et chiffrés : pages, vidéos et audio.",
   "lang": "fr",
   "start_url": "./",
