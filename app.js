@@ -2,7 +2,7 @@ import { createVault, unlockVault, sealVault, rewrapVault, decryptJson } from '.
 import { analyze, fetchPreview, extractUrl, domainOf } from './media.js';
 import * as sync from './sync.js';
 
-const VERSION = '1.0.0';
+const VERSION = '__VERSION__'; // remplacé au déploiement (numéro + commit)
 const LS_KEY = 'signets.vault.v1';
 const $ = (s, r = document) => r.querySelector(s);
 const $$ = (s, r = document) => [...r.querySelectorAll(s)];
@@ -499,7 +499,7 @@ $('#settingsBtn').onclick = () => {
   f.autoLock.value = String(s.autoLock); f.lockOnHide.checked = s.lockOnHide; f.blurAll.checked = s.blurAll;
   f.bUrl.value = b.url; f.bHeader.value = b.header; f.bValue.value = b.value; f.bMeta.value = b.meta; f.bAuto.checked = b.auto;
   $('#bStatus').textContent = ''; $('#dataStatus').textContent = ''; showCode();
-  $('#version').textContent = `v${VERSION} · ${data.items.length} favoris`;
+  $('#version').textContent = `${VERSION.startsWith('__') ? 'dev' : 'v' + VERSION} · ${data.items.length} favoris`;
   $('#setDlg').showModal();
 };
 function readBackupForm() {
