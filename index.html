@@ -170,64 +170,67 @@
 <!-- Réglages -->
 <dialog id="setDlg" class="settings">
   <form method="dialog" id="setForm">
-    <h2>Réglages</h2>
+    <header class="dlg-head"><h2>Réglages</h2></header>
 
-    <fieldset>
-      <legend>Confidentialité</legend>
-      <label>Verrouiller après
-        <select name="autoLock">
-          <option value="1">1 min d'inactivité</option>
-          <option value="5">5 min</option>
-          <option value="15">15 min</option>
-          <option value="60">1 h</option>
-          <option value="0">Jamais (déconseillé)</option>
-        </select>
-      </label>
-      <label class="check"><input type="checkbox" name="lockOnHide"> Verrouiller dès que l'app passe en arrière-plan</label>
-      <label class="check"><input type="checkbox" name="blurAll"> Flouter toutes les miniatures</label>
-    </fieldset>
+    <div class="dlg-body">
+      <section>
+        <h3>Confidentialité</h3>
+        <label class="line">Verrouiller après
+          <select name="autoLock">
+            <option value="1">1 min</option>
+            <option value="5">5 min</option>
+            <option value="15">15 min</option>
+            <option value="60">1 h</option>
+            <option value="0">Jamais</option>
+          </select>
+        </label>
+        <label class="check"><input type="checkbox" name="lockOnHide"> Verrouiller en quittant l'app</label>
+        <label class="check"><input type="checkbox" name="blurAll"> Flouter toutes les miniatures</label>
+      </section>
 
-    <fieldset>
-      <legend>Sauvegarde en ligne sécurisée</legend>
-      <label>Code de sauvegarde
+      <section>
+        <h3>Sauvegarde en ligne sécurisée</h3>
         <div class="row-btn">
-          <input name="bCode" class="mono" placeholder="XXXX-XXXX-XXXX-XXXX" autocomplete="off" autocapitalize="characters" spellcheck="false">
-          <button type="button" id="bCopy">Copier</button>
+          <input name="bCode" class="mono" aria-label="Code de sauvegarde" placeholder="XXXX-XXXX-XXXX-XXXX" autocomplete="off" autocapitalize="characters" spellcheck="false">
+          <button type="button" class="sm" id="bCopy">Copier</button>
         </div>
-      </label>
-      <button type="button" id="bGen">Générer un code</button>
-      <label class="check"><input type="checkbox" name="bAuto"> Sauvegarder automatiquement à chaque modification</label>
-      <p class="hint">Tout est chiffré sur ton appareil avant l'envoi : personne d'autre que toi ne peut lire tes favoris.</p>
-      <div class="actions wrap">
-        <button type="button" id="bTest">Tester</button>
-        <button type="button" id="bPush">Sauvegarder maintenant</button>
-        <button type="button" id="bPull">Synchroniser</button>
-      </div>
-      <p id="bStatus" class="hint" role="status"></p>
-    </fieldset>
+        <label class="check"><input type="checkbox" name="bAuto"> Sauvegarder automatiquement</label>
+        <div class="btns">
+          <button type="button" class="sm" id="bGen">Nouveau code</button>
+          <button type="button" class="sm" id="bTest">Tester</button>
+          <button type="button" class="sm" id="bPush">Sauvegarder</button>
+          <button type="button" class="sm" id="bPull">Synchroniser</button>
+        </div>
+        <p id="bStatus" class="hint" role="status"></p>
+        <p class="hint">Tout est chiffré sur ton appareil avant l'envoi : personne d'autre que toi ne peut lire tes favoris.</p>
+      </section>
 
-    <fieldset>
-      <legend>Données</legend>
-      <div class="actions wrap">
-        <button type="button" id="exportBtn">Exporter (fichier chiffré)</button>
-        <button type="button" id="importBtn">Importer…</button>
-        <button type="button" id="importHtmlBtn">Importer favoris navigateur (.html)</button>
-        <button type="button" id="refreshThumbs">Compléter les aperçus manquants</button>
-        <button type="button" id="pwBtn">Changer le mot de passe</button>
-        <button type="button" id="wipeBtn" class="danger">Effacer de cet appareil</button>
-      </div>
-      <input type="file" id="importFile" accept=".json,application/json" hidden>
-      <input type="file" id="importHtml" accept=".html,text/html" hidden>
-      <p id="dataStatus" class="hint" role="status"></p>
-    </fieldset>
+      <section>
+        <h3>Données</h3>
+        <div class="btns two">
+          <button type="button" class="sm" id="exportBtn">Exporter</button>
+          <button type="button" class="sm" id="importBtn">Importer</button>
+          <button type="button" class="sm" id="importHtmlBtn">Importer (.html)</button>
+          <button type="button" class="sm" id="refreshThumbs">Aperçus manquants</button>
+          <button type="button" class="sm" id="pwBtn">Mot de passe…</button>
+          <button type="button" class="sm danger" id="wipeBtn">Effacer cet appareil</button>
+        </div>
+        <input type="file" id="importFile" accept=".json,application/json" hidden>
+        <input type="file" id="importHtml" accept=".html,text/html" hidden>
+        <p id="dataStatus" class="hint" role="status"></p>
+      </section>
 
-    <div class="actions wrap">
-      <span class="muted small" id="version"></span>
-      <button type="button" id="updateBtn">Forcer la mise à jour</button>
-      <span class="spacer"></span>
+      <section>
+        <h3>À propos</h3>
+        <div class="line"><span class="muted" id="version"></span>
+          <button type="button" class="sm" id="updateBtn">Forcer la mise à jour</button></div>
+      </section>
+    </div>
+
+    <footer class="dlg-foot">
       <button value="cancel" formnovalidate>Annuler</button>
       <button class="primary" value="ok">Enregistrer</button>
-    </div>
+    </footer>
   </form>
 </dialog>
 
