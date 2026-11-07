@@ -26,7 +26,7 @@
 
     <form id="unlockForm" method="post" action="#" hidden>
       <p class="muted">Coffre verrouillé</p>
-      <label class="idlabel">Identifiant <span>(pour ton gestionnaire de mots de passe)</span><input type="text" name="username" autocomplete="username" value="coffre" aria-label="Identifiant du coffre" autocapitalize="none" spellcheck="false"></label>
+      <label class="idlabel">Code de sauvegarde <span>(ton identifiant)</span><input type="text" name="username" autocomplete="username" placeholder="XXXX-XXXX-XXXX-XXXX" aria-label="Code de sauvegarde" autocapitalize="characters" spellcheck="false"></label>
       <input id="unlockPw" name="password" type="password" autocomplete="current-password" placeholder="Mot de passe" required>
       <button class="primary" type="submit">Déverrouiller</button>
       <p id="unlockErr" class="error" role="alert"></p>
@@ -40,8 +40,8 @@
     </div>
 
     <form id="createForm" method="post" action="#" hidden>
-      <p class="muted">Choisis un mot de passe. Il chiffre tout, y compris la sauvegarde en ligne. <strong>Il ne peut pas être récupéré.</strong></p>
-      <label class="idlabel">Identifiant <span>(pour ton gestionnaire de mots de passe)</span><input type="text" name="username" autocomplete="username" value="coffre" aria-label="Identifiant du coffre" autocapitalize="none" spellcheck="false"></label>
+      <p class="muted">Voici ton code de sauvegarde : c'est ton identifiant, note-le bien. Choisis ensuite un mot de passe : il chiffre tout. <strong>Il ne peut pas être récupéré.</strong></p>
+      <label class="idlabel">Code de sauvegarde <span>(ton identifiant)</span><input type="text" name="username" autocomplete="username" placeholder="XXXX-XXXX-XXXX-XXXX" aria-label="Code de sauvegarde" autocapitalize="characters" spellcheck="false"></label>
       <input id="createPw" name="new-password" type="password" autocomplete="new-password" placeholder="Mot de passe" minlength="6" required>
       <input id="createPw2" name="new-password-confirm" type="password" autocomplete="new-password" placeholder="Confirmer" minlength="6" required>
       <p id="pwHint" class="hint"></p>

@@ -25,11 +25,17 @@ const emptyData = () => ({ items: [], tombstones: {}, settings: defaultSettings(
 const uid = () => crypto.randomUUID ? crypto.randomUUID() : Date.now().toString(36) + Math.random().toString(36).slice(2);
 
 // ---------- Stockage local ----------
+const BACKUP_BASE = 'https://sauvegarde.toolsmaker.workers.dev/v1/bookmarks/';
+const CODE_RE = /^[A-Z0-9]{4}(-[A-Z0-9]{4}){3,7}$/;
+const CODE_KEY = 'signets.code';
+const storedCode = () => { try { return localStorage.getItem(CODE_KEY) || ''; } catch { return ''; } };
+const storeCode = (c) => { try { c ? localStorage.setItem(CODE_KEY, c) : localStorage.removeItem(CODE_KEY); } catch {} };
 function loadLocal() { try { return JSON.parse(localStorage.getItem(LS_KEY)); } catch { return null; } }
 function saveLocalBlob(v) { localStorage.setItem(LS_KEY, JSON.stringify(v)); }
 async function persist({ syncSoon = true } = {}) {
   vault = await sealVault(vault, dek, data);
   saveLocalBlob(vault);
+  storeCode(codeFromUrl(data.settings.backup.url));
   if (syncSoon && data.settings.backup.auto && sync.isConfigured(data.settings.backup)) scheduleSync();
 }
 
@@ -101,6 +107,9 @@ function openUrl(item) {
 function showLock() {
   $('#app').hidden = true; $('#lock').hidden = false;
   vault = loadLocal();
+  const idField = $('#unlockForm [name=username]');
+  idField.value = storedCode();
+  idField.closest('label').hidden = !idField.value;
   if (vault) { showOnly('unlockForm'); setTimeout(() => $('#unlockPw').focus(), 50); }
   else showOnly('setupChoice');
 }
@@ -161,7 +170,7 @@ function passwordHint(pw) {
   return 'Bon mot de passe.';
 }
 
-$('#goCreate').onclick = () => { showOnly('createForm'); $('#createPw').focus(); };
+$('#goCreate').onclick = () => { $('#createForm [name=username]').value = sync.generateCode(); showOnly('createForm'); $('#createPw').focus(); };
 $('#goRestore').onclick = () => showOnly('restoreForm');
 $$('#lock .back').forEach(b => b.onclick = () => showOnly(loadLocal() ? 'unlockForm' : 'setupChoice'));
 $('#createPw').oninput = (e) => { $('#pwHint').textContent = passwordHint(e.target.value); };
@@ -176,11 +185,15 @@ $('#createForm').onsubmit = async (e) => {
   setBusy(true);
   try {
     data = emptyData();
+    const code = f.username.value.trim().toUpperCase();
+    if (CODE_RE.test(code)) data.settings.backup = { ...data.settings.backup, url: BACKUP_BASE + code, auto: true };
     ({ vault, dek } = await createVault(pw, data));
     saveLocalBlob(vault);
+    storeCode(CODE_RE.test(code) ? code : '');
     f.reset(); $('#pwHint').textContent = '';
     await enterApp();
-    toast('Coffre créé. Pense à configurer la sauvegarde dans les réglages.', 4000);
+    toast('Coffre créé. Note ton code de sauvegarde (Réglages).', 4500);
+    if (sync.isConfigured(data.settings.backup)) syncNow({ quiet: true, password: pw });
   } catch (ex) { err.textContent = 'Erreur : ' + ex.message; }
   finally { setBusy(false); }
 };
@@ -219,6 +232,7 @@ $('#restoreForm').onsubmit = async (e) => {
     vault = remote; dek = r.dek; data = normalize(r.data);
     if (!sync.isConfigured(data.settings.backup)) data.settings.backup = cfg;
     await persist({ syncSoon: false });
+    storeCode(code);
     f.reset();
     await enterApp();
     toast(`${data.items.length} favoris restaurés.`);
@@ -514,8 +528,6 @@ addEventListener('paste', (e) => {
 });
 
 // ---------- Réglages ----------
-const BACKUP_BASE = 'https://sauvegarde.toolsmaker.workers.dev/v1/bookmarks/';
-const CODE_RE = /^[A-Z0-9]{4}(-[A-Z0-9]{4}){3,7}$/;
 // Saisie du code : majuscules et tirets ajoutés automatiquement (XXXX-XXXX-XXXX-XXXX).
 function formatCode(raw) { return (raw.toUpperCase().replace(/[^A-Z0-9]/g, '').slice(0, 32).match(/.{1,4}/g) || []).join('-'); }
 function autoDash(input) {
@@ -533,6 +545,8 @@ function autoDash(input) {
 const codeFromUrl = (u) => ((u || '').match(/[A-Z0-9]{4}(-[A-Z0-9]{4}){3,7}(?=[/?#]|$)/i) || [''])[0].toUpperCase();
 autoDash($('#setForm').bCode);
 autoDash($('#restoreForm').username);
+autoDash($('#createForm').username);
+autoDash($('#unlockForm').username);
 $('#bCopy').onclick = () => copy($('#setForm').bCode.value);
 $('#settingsBtn').onclick = () => {
   const f = $('#setForm'), s = data.settings, b = s.backup;
