@@ -25,8 +25,8 @@
     <h1>Safe Bookmarks</h1>
 
     <form id="unlockForm" method="post" action="#" hidden>
-      <input type="text" name="username" autocomplete="username" value="coffre" aria-label="Identifiant du coffre" autocapitalize="none" spellcheck="false">
       <p class="muted">Coffre verrouillé</p>
+      <label class="idlabel">Identifiant <span>(pour ton gestionnaire de mots de passe)</span><input type="text" name="username" autocomplete="username" value="coffre" aria-label="Identifiant du coffre" autocapitalize="none" spellcheck="false"></label>
       <input id="unlockPw" name="password" type="password" autocomplete="current-password" placeholder="Mot de passe" required>
       <button class="primary" type="submit">Déverrouiller</button>
       <p id="unlockErr" class="error" role="alert"></p>
@@ -40,8 +40,8 @@
     </div>
 
     <form id="createForm" method="post" action="#" hidden>
-      <input type="text" name="username" autocomplete="username" value="coffre" aria-label="Identifiant du coffre" autocapitalize="none" spellcheck="false">
       <p class="muted">Choisis un mot de passe. Il chiffre tout, y compris la sauvegarde en ligne. <strong>Il ne peut pas être récupéré.</strong></p>
+      <label class="idlabel">Identifiant <span>(pour ton gestionnaire de mots de passe)</span><input type="text" name="username" autocomplete="username" value="coffre" aria-label="Identifiant du coffre" autocapitalize="none" spellcheck="false"></label>
       <input id="createPw" name="new-password" type="password" autocomplete="new-password" placeholder="Mot de passe" minlength="6" required>
       <input id="createPw2" name="new-password-confirm" type="password" autocomplete="new-password" placeholder="Confirmer" minlength="6" required>
       <p id="pwHint" class="hint"></p>

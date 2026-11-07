@@ -187,3 +187,7 @@ dialog:not(.settings) button { height: 36px; padding: 0 14px; font-size: 14px; l
   .filters select { margin-left: auto; }
   .chips.tags { padding: 0 12px 8px; }
 }
+
+label.idlabel { text-align: left; font-size: 12px; color: var(--muted); gap: 4px; }
+label.idlabel span { opacity: .8; }
+label.idlabel input { color: var(--muted); }
